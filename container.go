@@ -4,28 +4,26 @@ import (
 	"errors"
 )
 
-var (
-	ErrDependencyAlreadyExists = errors.New("Dependency already exists.")
-	ErrDependencyNotFound      = errors.New("Dependency not found.")
-)
+var ErrDependencyAlreadyExists = errors.New("Dependency already exists.")
+var ErrDependencyNotFound = errors.New("Dependency not found.")
+
+type Container struct {
+	entries map[string]*entry
+}
 
 type entry struct {
-	loader func(c *container) interface{}
+	loader func(c *Container) interface{}
 	cache  interface{}
 	loaded bool
 }
 
-type container struct {
-	entries map[string]*entry
-}
-
-func New() *container {
-	return &container{
+func New() *Container {
+	return &Container{
 		entries: make(map[string]*entry),
 	}
 }
 
-func (c *container) Set(key string, loader func(c *container) interface{}) error {
+func (c *Container) Set(key string, loader func(c *Container) interface{}) error {
 	_, ok := c.entries[key]
 	if ok {
 		return ErrDependencyAlreadyExists
@@ -40,7 +38,7 @@ func (c *container) Set(key string, loader func(c *container) interface{}) error
 	return nil
 }
 
-func (c *container) Get(key string) (interface{}, error) {
+func (c *Container) Get(key string) (interface{}, error) {
 	dep, ok := c.entries[key]
 	if !ok {
 		return nil, ErrDependencyNotFound

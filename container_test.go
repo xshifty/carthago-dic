@@ -15,7 +15,7 @@ func TestContainerUsage(t *testing.T) {
 	t.Parallel()
 
 	t.Run("basic", func(t *testing.T) {
-		c.Set("mock", func(c *container) interface{} {
+		c.Set("mock", func(c *Container) interface{} {
 			return &mockHandler{
 				message: "Hello Carthago",
 			}
@@ -29,7 +29,7 @@ func TestContainerUsage(t *testing.T) {
 	})
 
 	t.Run("already-exists", func(t *testing.T) {
-		errAlready := c.Set("mock", func(c *container) interface{} {
+		errAlready := c.Set("mock", func(c *Container) interface{} {
 			return nil
 		})
 		if errAlready != ErrDependencyAlreadyExists {
