@@ -11,7 +11,7 @@ type (
 )
 
 func TestContainerUsage(t *testing.T) {
-	c := New()
+	c := NewContainer()
 	t.Parallel()
 
 	t.Run("basic", func(t *testing.T) {

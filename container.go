@@ -2,12 +2,14 @@ package dic
 
 import (
 	"errors"
+	"sync"
 )
 
 var ErrDependencyAlreadyExists = errors.New("Dependency already exists.")
 var ErrDependencyNotFound = errors.New("Dependency not found.")
 
 type Container struct {
+	mutex   *sync.Mutex
 	entries map[string]*entry
 }
 
@@ -17,13 +19,14 @@ type entry struct {
 	loaded bool
 }
 
-func New() *Container {
-	return &Container{
-		entries: make(map[string]*entry),
-	}
+func NewContainer() *Container {
+	return &Container{&sync.Mutex{}, make(map[string]*entry)}
 }
 
 func (c *Container) Set(key string, loader func(c *Container) interface{}) error {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
 	_, ok := c.entries[key]
 	if ok {
 		return ErrDependencyAlreadyExists
@@ -39,6 +42,9 @@ func (c *Container) Set(key string, loader func(c *Container) interface{}) error
 }
 
 func (c *Container) Get(key string) (interface{}, error) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
 	dep, ok := c.entries[key]
 	if !ok {
 		return nil, ErrDependencyNotFound
@@ -50,4 +56,11 @@ func (c *Container) Get(key string) (interface{}, error) {
 	}
 
 	return dep.cache, nil
+}
+
+func (c *Container) Delete(key string) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	delete(c.entries, key)
 }
