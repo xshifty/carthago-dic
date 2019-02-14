@@ -37,6 +37,18 @@ func TestContainerUsage(t *testing.T) {
 		}
 	})
 
+	t.Run("delete", func(t *testing.T) {
+		c.Set("will be removed", func(c *Container) interface{} {
+			return 10
+		})
+		c.Delete("will be removed")
+
+		_, errNotFound := c.Get("will be removed")
+		if errNotFound != ErrDependencyNotFound {
+			t.Error("Dependency still exists after deletion!")
+		}
+	})
+
 	t.Run("not-found", func(t *testing.T) {
 		_, errNotFound := c.Get("xpto")
 		if errNotFound != ErrDependencyNotFound {
